@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Conversor GBFF – JSON</title>
+  <meta name="author" content="Matheus Avellar">
+  <!-- <meta name="description" content=""> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" type="text/css" href="./style.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+  <header>
+    <p class="overhead">Conversor</p>
+    <h1>GBFF -> JSON </h1>
+  </header>
+  <main>
+    <section>
+      <p>
+        Insira o conteúdo do GBFF no campo abaixo e, em seguida, clique no botão
+        "Converter":
+      </p>
+    </section>
+    <section>
+      <label for="gbff">GBFF</label>
+      <article class="textarea">
+        <textarea id="gbff" placeholder="LOCUS       SCU49845     5028 bp    DNA             PLN       21-JUN-1999
+DEFINITION  Saccharomyces cerevisiae TCP1-beta gene, partial cds, and Axl2p
+            (AXL2) and Rev7p (REV7) genes, complete cds.
+ACCESSION   U49845
+VERSION     U49845.1  GI:1293613
+KEYWORDS    .
+SOURCE      Saccharomyces cerevisiae (baker's yeast)
+  ORGANISM  Saccharomyces cerevisiae
+            Eukaryota; Fungi; Ascomycota; Saccharomycotina; Saccharomycetes;
+            Saccharomycetales; Saccharomycetaceae; Saccharomyces.
+            ..."></textarea>
+      </article>
+      <article>
+        <!-- TODO: Adicionar upload de arquivo -->
+      </article>
+      <article class="right">
+        <button>Converter</button>
+      </article>
+    </section>
+    <hr>
+    <section>
+      <p>
+        Após o arquivo ser convertido, você poderá copiar o JSON gerado do campo
+        abaixo:
+      </p>
+    </section>
+    <section>
+      <label for="json">JSON</label>
+      <article class="textarea">
+        <textarea id="json" readonly></textarea>
+      </article>
+      <article class="right">
+        <!-- TODO: Adicionar ícones aos botões -->
+        <button>Copiar</button>
+        <button>Baixar</button>
+      </article>
+    </section>
+  </main>
+  <footer>
+    <section>
+      <img class="minerva" src="./minerva.svg" alt="Perfil da Minerva, avatar da UFRJ.">
+      <article>
+        <p>
+          Desenvolvido por <a href="">Breno Costa</a>, <a href="">Bruno Hryniewicz</a>,
+          <a href="">Matheus Avellar</a>, <a href="">Nickolas Gomes</a> e
+          <a href="">Pedro</a>, para a disciplina de <strong>Bioinformática</strong>.
+        </p>
+        <p>
+          Curso de Ciência da Computação, UFRJ – 2020.★
+        </p>
+      </article>
+    </section>
+  </footer>
+  <!--[Ref] csswizardry.com/2020/05/the-fastest-google-fonts-->
+  <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Inter:wght@400;500;700;800&display=swap">
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Inter:wght@400;500;700;800&display=swap">
+</body>
+</html>
