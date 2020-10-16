@@ -17,49 +17,61 @@
   <main>
     <section>
       <p>
-        Insira o conteúdo do GBFF no campo abaixo e, em seguida, clique no botão
-        "Converter":
+        Insira um link para um arquivo GBFF no campo abaixo, ou envie um arquivo
+        de seu computador clicando em "Upload".
       </p>
     </section>
     <section>
-      <label for="gbff">GBFF</label>
-      <article class="textarea">
-        <textarea id="gbff" placeholder="LOCUS       SCU49845     5028 bp    DNA             PLN       21-JUN-1999
-DEFINITION  Saccharomyces cerevisiae TCP1-beta gene, partial cds, and Axl2p
-            (AXL2) and Rev7p (REV7) genes, complete cds.
-ACCESSION   U49845
-VERSION     U49845.1  GI:1293613
-KEYWORDS    .
-SOURCE      Saccharomyces cerevisiae (baker's yeast)
-  ORGANISM  Saccharomyces cerevisiae
-            Eukaryota; Fungi; Ascomycota; Saccharomycotina; Saccharomycetes;
-            Saccharomycetales; Saccharomycetaceae; Saccharomyces.
-            ..."></textarea>
-      </article>
-      <article>
-        <!-- TODO: Adicionar upload de arquivo -->
-      </article>
-      <article class="right">
-        <button>Converter</button>
-      </article>
-    </section>
-    <hr>
-    <section>
-      <p>
-        Após o arquivo ser convertido, você poderá copiar o JSON gerado do campo
-        abaixo:
-      </p>
-    </section>
-    <section>
-      <label for="json">JSON</label>
-      <article class="textarea">
-        <textarea id="json" readonly></textarea>
-      </article>
-      <article class="right">
-        <!-- TODO: Adicionar ícones aos botões -->
-        <button>Copiar</button>
-        <button>Baixar</button>
-      </article>
+      <form method="post" action="" enctype="multipart/form-data">
+
+        <article class="textinput">
+          <input id="gbff" type="text" placeholder="Link do seu arquivo">
+        </article>
+        <p>ou</p>
+        <article>
+          <label class="file-label textinput" for="file">
+            <input id="file-preview" type="text" placeholder="Escolha um arquivo" disabled>
+          </label>
+          <label class="file">
+            <span class="file-custom">Upload</span>
+            <input id="file" type="file">
+          </label>
+          <script>
+const filepreview = document.getElementById("file-preview");
+const fileinput = document.getElementById("file");
+fileinput.onchange = function(e) {
+  if(fileinput.files.length == 1) {
+    filepreview.value = `${fileinput.files[0].name} (${humanFileSize(fileinput.files[0].size,2)})`;
+  } else if(fileinput.files.length > 1) {
+    alert("Por favor, envie somente 1 arquivo!");
+  }
+}
+
+// [Ref] stackoverflow.com/a/14919494/4824627
+function humanFileSize(bytes, dp=1) {
+  const thresh = 1024;
+
+  if(Math.abs(bytes) < thresh)
+    return `${bytes} B`;
+
+  const units = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+  let u = -1;
+  const r = 10**dp;
+
+  do {
+    bytes /= thresh;
+    ++u;
+  } while(Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+  return bytes.toFixed(dp) + " " + units[u];
+}
+          </script>
+        </article>
+        <article class="right">
+          <button type="submit">Enviar</button>
+        </article>
+      </form>
+      <hr>
     </section>
   </main>
   <footer>

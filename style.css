@@ -66,10 +66,9 @@ hr:after {
   letter-spacing: 2em;
   color: #cacaca;
 }
-textarea {
+textarea,input[type="text"] {
   vertical-align: top;
   resize: none;
-  height: 20em;
   width: 100%;
   border: 0;
   padding: 1em;
@@ -80,7 +79,7 @@ textarea {
   box-sizing: border-box;
   white-space: pre;
 }
-label {
+label.textinput {
   text-transform: uppercase;
   margin: 0;
   letter-spacing: .125em;
@@ -91,7 +90,7 @@ label {
   text-align: right;
   margin-bottom: -0.5em;
 }
-button {
+button,label.file {
   background-color: var(--accent-light);
   margin: .5em 0;
   border: 0;
@@ -99,6 +98,7 @@ button {
   outline: 0;
   font-family: inherit;
   font-weight: 500;
+  font-size: inherit;
   border-radius: .5em;
   color: #0a0a0a;
   vertical-align: middle;
@@ -107,11 +107,17 @@ button {
   transition: box-shadow .2s ease;
   box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06);
 }
-button:focus {
+button:focus, label.file:focus, label.file:focus-within {
   box-shadow: 0 1px 6px 0 rgba(0,0,0,0.2), 0 1px 5px 0 rgba(0,0,0,0.05);
 }
 button:active {
   background-color: var(--accent-strong);
+}
+label.file {
+  background-color: #cfd6d8;
+}
+label.file:active {
+  background-color: #bbc1c3;
 }
 
 .overhead {
@@ -121,14 +127,14 @@ button:active {
   font-weight: 700;
   color: var(--accent);
 }
-.textarea {
+.textinput {
   box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06);
   transition: box-shadow .2s ease;
   width: 100%;
   margin: .75em 0;
   border-radius: .5em;
 }
-.textarea:focus-within {
+.textinput:focus-within {
   box-shadow: 0 3px 6px 2px rgba(0,0,0,.2), 0 1px 2px 0 rgba(0,0,0,.1);
 }
 .right {
@@ -147,11 +153,40 @@ button:active {
 }
 
 
+.file {
+  position: relative;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.file input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  opacity: 0;
+}
+
+label.file-label {
+  width: 50%;
+  font-size: inherit;
+  position: relative;
+  vertical-align: middle;
+  margin-bottom: .75em;
+}
+.file-label > input {
+  pointer-events: none;
+}
+
+
+
 @media screen and (max-width: 600px) {
-  .textarea {
+  .textinput {
     width: 100%;
   }
   .right {
     padding: 0;
+  }
+  label.file-label {
+    width: 100%;
   }
 }
