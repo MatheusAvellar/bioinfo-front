@@ -22,10 +22,9 @@
       </p>
     </section>
     <section>
-      <form method="post" action="" enctype="multipart/form-data">
-
+      <form method="post" action="/file" enctype="multipart/form-data">
         <article class="textinput">
-          <input id="gbff" type="text" placeholder="Link do seu arquivo">
+          <input id="gbff" name="file-link" type="text" placeholder="Link do seu arquivo">
         </article>
         <p>ou</p>
         <article>
@@ -34,7 +33,7 @@
           </label>
           <label class="file">
             <span class="file-custom">Upload</span>
-            <input id="file" type="file">
+            <input id="file" name="file" type="file">
           </label>
           <script>
 const filepreview = document.getElementById("file-preview");
