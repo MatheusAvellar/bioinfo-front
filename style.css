@@ -152,7 +152,6 @@ label.file:active {
   background-size: 20%;
 }
 
-
 .file {
   position: relative;
   overflow: hidden;
@@ -177,8 +176,6 @@ label.file-label {
   pointer-events: none;
 }
 
-
-
 @media screen and (max-width: 600px) {
   .textinput {
     width: 100%;
@@ -189,4 +186,9 @@ label.file-label {
   label.file-label {
     width: 100%;
   }
+}
+
+#files-list:empty:before {
+  content: "Nenhum arquivo ainda!";
+  color: gray;
 }

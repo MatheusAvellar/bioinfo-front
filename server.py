@@ -37,16 +37,20 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     print((r, info, "by: ", self.client_address))
     f = BytesIO()
     f.write(b"<!DOCTYPE html>")
-    f.write(b"<html>\n<title>Upload Result Page</title>\n")
-    f.write(b"<body>\n<h2>Upload Result Page</h2>\n")
-    f.write(b"<hr>\n")
+    f.write(b"<html><title>Resultado do Upload</title>")
+    f.write(b"<meta charset=\"utf-8\">")
+    f.write(b"<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\">")
+    f.write(b"<body>")
+    f.write(b"<header><h2>Resultado do Upload</h2></header>")
+    f.write(b"<main>")
     if r:
-      f.write(b"<strong>Success:</strong>")
+      f.write(b"<strong>Sucesso: </strong>")
     else:
-      f.write(b"<strong>Failed:</strong>")
+      f.write(b"<strong>Falha: </strong>")
     f.write(info.encode())
-    f.write(("<br><a href=\"%s\">back</a>" % self.headers['referer']).encode())
-    f.write(("<br><a href=\"/files\">all files</a>").encode())
+    f.write(b"<hr><a href=\"/\">Home</a>")
+    f.write(b"<br><a href=\"/input\">Arquivos recebidos</a>")
+    f.write(b"<br><a href=\"/output\">Arquivos convertidos</a>")
     length = f.tell()
     f.seek(0)
     self.send_response(200)
@@ -60,14 +64,14 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
   def deal_post_data(self):
     content_type = self.headers['content-type']
     if not content_type:
-      return (False, "Content-Type header doesn't contain boundary")
+      return (False, "Dados recebidos estão mal formatados (header 'Content-Type' não contém boundary)")
     boundary = content_type.split("=")[1].encode()
     remainbytes = int(self.headers['content-length'])
     # Boundary
     line = self.rfile.readline()
     remainbytes -= len(line)
     if not boundary in line:
-      return (False, "Content doesn't begin with boundary")
+      return (False, "Dados recebidos estão mal formatados (boundary inicial não encontrado)")
 
     # First Content-Disposition
     line = self.rfile.readline()
@@ -86,7 +90,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     line = self.rfile.readline()
     remainbytes -= len(line)
     if not boundary in line:
-      return (False, "Content doesn't begin with boundary")
+      return (False, "Dados recebidos estão mal formatados (boundary não encontrado)")
 
     # Second Content-Disposition
     line = self.rfile.readline()
@@ -96,7 +100,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
     fn = re.findall(r'Content-Disposition.*name="file"; filename="(.*)"', line.decode())
     if not fn or len(fn) < 1:
-      return (False, "Can't find out file name...")
+      return (False, "Nome do arquivo não encontrado")
 
     # If there's no file name = no file uploaded...
     fn = fn[0]
@@ -104,16 +108,18 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
       # Then try to download the link
       if len(file_link):
         requestDownload(file_link)
-        return (True, f"Link received ({file_link})")
+        return (True, f"Link recebido ({file_link})")
       # If there's no link, sad face :(
       else:
-        return (False, "Nothing received!")
+        return (False, "Nada recebido!")
 
     # Otherwise, if there is a file name, save its contents to a file
     try:
-      out = open(f"./files/{getID()}-{fn}", "wb")
+      final_fn = f"{getID()}-{fn}"
+      out = open(f"./input/{final_fn}", "wb")
+      print(f"Saving uploaded file to /input/{final_fn}")
     except IOError:
-      return (False, "Can't create file to write, do you have permission to write?")
+      return (False, "Falha ao criar arquivo para escrita.")
 
     # Content-Type
     line = self.rfile.readline()
@@ -134,11 +140,11 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
           preline = preline[0:-1]
         out.write(preline)
         out.close()
-        return (True, "File upload success!")
+        return (True, "Arquivo recebido com sucesso!")
       else:
         out.write(preline)
         preline = line
-    return (False, "Unexpected end of data")
+    return (False, "Fim inesperado dos dados.")
 
   def send_head(self):
     """Common code for GET and HEAD commands.
@@ -195,10 +201,12 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     list.sort(key=lambda a: a.lower())
     f = BytesIO()
     displaypath = html.escape(urllib.parse.unquote(self.path))
-    f.write(b'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
-    f.write(("<html>\n<title>Directory listing for %s</title>\n" % displaypath).encode())
-    f.write(("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath).encode())
-    f.write(b"<hr>\n<ul>\n")
+    f.write(b"<!DOCTYPE html>")
+    f.write(("<html><title>Directory listing for %s</title>" % displaypath).encode())
+    f.write(b"<meta charset=\"utf-8\">")
+    f.write(b"<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\">")
+    f.write(("<body><header><h2>Directory listing for %s</h2></header>" % displaypath).encode())
+    f.write(b"<main><ul id=\"files-list\">")
     for name in list:
       fullname = os.path.join(path, name)
       displayname = linkname = name
@@ -209,9 +217,12 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
       if os.path.islink(fullname):
         displayname = name + "@"
         # Note: a link to a directory displays with @ and links with /
-      f.write(('<li><a href="%s">%s</a>\n'
+      f.write(('<li><a href="%s">%s</a>'
           % (urllib.parse.quote(linkname), html.escape(displayname))).encode())
-    f.write(b"</ul>\n<hr>\n</body>\n</html>\n")
+    f.write(b"</ul><hr>")
+    f.write(b"<br><a href=\"/\">Home</a>")
+    f.write(b"<br><a href=\"/input\">Arquivos recebidos</a>")
+    f.write(b"<br><a href=\"/output\">Arquivos convertidos</a>")
     length = f.tell()
     f.seek(0)
     self.send_response(200)
@@ -293,9 +304,9 @@ def download(url):
   with urllib.request.urlopen(url) as f:
     html = f.read().decode("utf-8")
   outputfilename = f"{getID()}.gbff"
-  with open(f"./files/{outputfilename}", "w", encoding="utf8") as outputfilestream:
+  with open(f"./input/{outputfilename}", "w", encoding="utf8") as outputfilestream:
     outputfilestream.write(html)
-  print(f"Saved file '{outputfilename}' with contents from '{url}'")
+  print(f"Saved file to '/input/{outputfilename}' with contents from '{url}'")
 
 def requestDownload(url):
   urlstatus, info = checkURL(url)
@@ -311,6 +322,7 @@ def run(HandlerClass = SimpleHTTPRequestHandler,
   http.server.test(HandlerClass, ServerClass)
 
 if __name__ == "__main__":
-  # Create output directory if it doesn't exist
-  os.makedirs("./files", exist_ok=True)
+  # Create input and output directory if they don't exist
+  os.makedirs("./input", exist_ok=True)
+  os.makedirs("./output", exist_ok=True)
   run()
