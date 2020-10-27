@@ -9,6 +9,7 @@ import mimetypes
 import re
 from io import BytesIO
 
+import json
 import string
 import random
 import threading
@@ -117,7 +118,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     try:
       final_fn = f"{getID()}-{fn}"
       out = open(f"./input/{final_fn}", "wb")
-      print(f"Saving uploaded file to /input/{final_fn}")
+      print(f"Salvando arquivo recebido em '/input/{final_fn}'")
     except IOError:
       return (False, "Falha ao criar arquivo para escrita.")
 
@@ -140,6 +141,9 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
           preline = preline[0:-1]
         out.write(preline)
         out.close()
+
+        convert_thread = threading.Thread(target=triggerConversion, args=[f"./input/{final_fn}"])
+        convert_thread.start()
         return (True, "Arquivo recebido com sucesso!")
       else:
         out.write(preline)
@@ -177,7 +181,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
       # transmitted *less* than the content-length!
       f = open(path, 'rb')
     except IOError:
-      self.send_error(404, "File not found")
+      self.send_error(404, "Arquivo não encontrado")
       return None
     self.send_response(200)
     self.send_header("Content-type", ctype)
@@ -196,7 +200,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     try:
       list = os.listdir(path)
     except os.error:
-      self.send_error(404, "No permission to list directory")
+      self.send_error(404, "Sem permissão para listar diretório")
       return None
     list.sort(key=lambda a: a.lower())
     f = BytesIO()
@@ -297,7 +301,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 def checkURL(url):
   if url.startswith("https://pastebin.com/raw/"):
     return (True, "")
-  return (False, "Please only use 'https://pastebin.com/raw/...' links!")
+  return (False, "Somente utilizamos links 'https://pastebin.com/raw/...' por enquanto!")
 
 # [Ref] stackoverflow.com/a/22682/4824627
 def download(url):
@@ -306,16 +310,32 @@ def download(url):
   outputfilename = f"{getID()}.gbff"
   with open(f"./input/{outputfilename}", "w", encoding="utf8") as outputfilestream:
     outputfilestream.write(html)
-  print(f"Saved file to '/input/{outputfilename}' with contents from '{url}'")
+  print(f"Arquivo salvo em '/input/{outputfilename}' com conteúdo do URL '{url}'")
+  triggerConversion(f"./input/{outputfilename}")
 
 def requestDownload(url):
   urlstatus, info = checkURL(url)
   if not urlstatus:
     print(info)
     return
-  print(f"Requesting download of '{url}'")
+  print(f"Requisitando download de '{url}'")
   dl = threading.Thread(target=download, args=[url])
   dl.start()
+
+
+from GBFF2JSON import convert as convert_gbff
+def triggerConversion(filename):
+  # Convert file (will hang if file isn't gbff)
+  converted_json = convert_gbff(filename)
+  # Remove `.gbff` from filename, if it exists
+  new_fn = re.sub("\\./input/", "", filename, flags=re.I)
+  new_fn = re.sub("\\.?gbff", "", new_fn, flags=re.I)
+  new_fn = re.sub("[^A-Za-z\\-_0-9]", "", new_fn)
+  # Write to output with .json at the end
+  with open(f"./output/{new_fn}.json", "w", encoding="utf8") as outputfilestream:
+    outputfilestream.write(converted_json)
+
+  print(f"Arquivo convertido com sucesso! Salvo em '/output/{new_fn}.json'")
 
 def run(HandlerClass = SimpleHTTPRequestHandler,
      ServerClass = http.server.HTTPServer):
