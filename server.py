@@ -198,11 +198,11 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     interface the same as for send_head().
     """
     try:
-      list = os.listdir(path)
+      dirlist = os.listdir(path)
     except os.error:
       self.send_error(404, "Sem permissão para listar diretório")
       return None
-    list.sort(key=lambda a: a.lower())
+    dirlist.sort(key=lambda a: a.lower())
     f = BytesIO()
     displaypath = html.escape(urllib.parse.unquote(self.path))
     f.write(b"<!DOCTYPE html>")
@@ -211,7 +211,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     f.write(b"<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\">")
     f.write(("<body><header><h2>Directory listing for %s</h2></header>" % displaypath).encode())
     f.write(b"<main><ul id=\"files-list\">")
-    for name in list:
+    for name in dirlist:
       fullname = os.path.join(path, name)
       displayname = linkname = name
       # Append / for directories or @ for symbolic links
@@ -221,8 +221,8 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
       if os.path.islink(fullname):
         displayname = name + "@"
         # Note: a link to a directory displays with @ and links with /
-      f.write(('<li><a href="%s">%s</a>'
-          % (urllib.parse.quote(linkname), html.escape(displayname))).encode())
+      f.write(('<li><a href="%s">%s</a> (%s)'
+          % (urllib.parse.quote(linkname), html.escape(displayname), sizeof_fmt(os.path.getsize(fullname)))).encode())
     f.write(b"</ul><hr>")
     f.write(b"<br><a href=\"/\">Home</a>")
     f.write(b"<br><a href=\"/input\">Arquivos recebidos</a>")
@@ -297,6 +297,14 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     ".c": "text/plain",
     ".h": "text/plain",
   })
+
+# [Ref] stackoverflow.com/a/1094933/4824627
+def sizeof_fmt(num, suffix='B'):
+  for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+    if abs(num) < 1024.0:
+      return "%3.2f %s%s" % (num, unit, suffix)
+    num /= 1024.0
+  return "%.2f %s%s" % (num, 'Yi', suffix)
 
 def checkURL(url):
   if url.startswith("https://pastebin.com/raw/"):
